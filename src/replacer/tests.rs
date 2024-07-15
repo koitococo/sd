@@ -39,7 +39,11 @@ fn replace(
     )
     .unwrap();
     assert_eq!(
-        std::str::from_utf8(&replacer.replace(src.as_bytes())),
+        std::str::from_utf8(
+            &replacer
+                .replace(src.as_bytes(), false, true)
+                .expect("No matched")
+        ),
         Ok(target)
     );
 }

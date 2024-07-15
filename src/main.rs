@@ -61,11 +61,20 @@ fn try_main() -> Result<()> {
 
     let needs_separator = sources.len() > 1;
 
+    // let replaced: Vec<_> = {
+    //     use rayon::prelude::*;
+    //     mmaps
+    //         .par_iter()
+    //         .map(|mmap| replacer.replace(&mmap))
+    //         .collect()
+    // };
     let replaced: Vec<_> = {
         use rayon::prelude::*;
         mmaps
             .par_iter()
-            .map(|mmap| replacer.replace(&mmap))
+            .filter_map(|mmap| {
+                replacer.replace(&mmap, options.only_matched, options.use_color)
+            })
             .collect()
     };
 

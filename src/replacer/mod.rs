@@ -74,10 +74,14 @@ impl Replacer {
         })
     }
 
-    pub(crate) fn replace<'a>(&'a self, content: &'a [u8]) -> Cow<'a, [u8]> {
+    pub(crate) fn replace<'a>(
+        &'a self,
+        content: &'a [u8],
+        only_matched: bool,
+        use_color: bool,
+    ) -> Option<Cow<'a, [u8]>> {
         let regex = &self.regex;
         let limit = self.replacements;
-        let use_color = false;
         if self.is_literal {
             Self::replacen(
                 regex,
@@ -85,6 +89,7 @@ impl Replacer {
                 content,
                 use_color,
                 regex::bytes::NoExpand(&self.replace_with),
+                only_matched,
             )
         } else {
             Self::replacen(
@@ -93,6 +98,7 @@ impl Replacer {
                 content,
                 use_color,
                 &*self.replace_with,
+                only_matched,
             )
         }
     }
@@ -103,26 +109,41 @@ impl Replacer {
         regex: &regex::bytes::Regex,
         limit: usize,
         haystack: &'haystack [u8],
-        _use_color: bool,
+        use_color: bool,
         mut rep: R,
-    ) -> Cow<'haystack, [u8]> {
+        only_matched: bool,
+    ) -> Option<Cow<'haystack, [u8]>> {
         let mut it = regex.captures_iter(haystack).enumerate().peekable();
         if it.peek().is_none() {
-            return Cow::Borrowed(haystack);
+            return None;
         }
         let mut new = Vec::with_capacity(haystack.len());
         let mut last_match = 0;
         for (i, cap) in it {
             // unwrap on 0 is OK because captures only reports matches
             let m = cap.get(0).unwrap();
-            new.extend_from_slice(&haystack[last_match..m.start()]);
+            if !only_matched {
+                new.extend_from_slice(&haystack[last_match..m.start()]);
+                if use_color {
+                    new.extend_from_slice(
+                        ansi_term::Color::Blue.prefix().to_string().as_bytes(),
+                    );
+                }
+            }
             rep.replace_append(&cap, &mut new);
+            if !only_matched && use_color {
+                new.extend_from_slice(
+                    ansi_term::Color::Blue.suffix().to_string().as_bytes(),
+                );
+            }
             last_match = m.end();
             if limit > 0 && i >= limit - 1 {
                 break;
             }
         }
-        new.extend_from_slice(&haystack[last_match..]);
-        Cow::Owned(new)
+        if !only_matched {
+            new.extend_from_slice(&haystack[last_match..]);
+        }
+        Some(Cow::Owned(new))
     }
 }

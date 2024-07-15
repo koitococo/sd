@@ -30,6 +30,20 @@ pub struct Options {
     pub literal_mode: bool,
 
     #[arg(
+        short = 'm',
+        long = "only-matched"
+    )]
+    /// Only show the lines that match the regex
+    pub only_matched: bool,
+
+    #[arg(
+        short = 'c',
+        long = "use-color"
+    )]
+    /// Use colors to highlight the matches
+    pub use_color: bool,
+
+    #[arg(
         short = 'n',
         long = "max-replacements",
         value_name = "LIMIT",
