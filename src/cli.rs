@@ -20,6 +20,10 @@ pub struct Options {
     /// format are likely to change in the future).
     pub preview: bool,
 
+    #[arg(short = 'E', long = "use-fancy-regex", alias = "extended")]
+    /// Use fancy regex instead of the default regex.
+    pub use_fancy_regex: bool,
+
     #[arg(
         short = 'F',
         long = "fixed-strings",
@@ -29,17 +33,11 @@ pub struct Options {
     /// Treat FIND and REPLACE_WITH args as literal strings
     pub literal_mode: bool,
 
-    #[arg(
-        short = 'm',
-        long = "only-matched"
-    )]
+    #[arg(short = 'm', long = "only-matched")]
     /// Only show the lines that match the regex
     pub only_matched: bool,
 
-    #[arg(
-        short = 'c',
-        long = "use-color"
-    )]
+    #[arg(short = 'c', long = "use-color")]
     /// Use colors to highlight the matches
     pub use_color: bool,
 

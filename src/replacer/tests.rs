@@ -30,9 +30,12 @@ fn replace(
     target: &'static str,
 ) {
     const UNLIMITED_REPLACEMENTS: usize = 0;
-    let replacer = Replacer::new(
-        look_for.into(),
-        replace_with.into(),
+    let look_for = look_for.into();
+    let replace_with = replace_with.into();
+    
+    let replacer = RegexReplacer::new(
+        look_for.clone(),
+        replace_with.clone(),
         literal,
         flags.map(ToOwned::to_owned),
         UNLIMITED_REPLACEMENTS,
@@ -41,11 +44,24 @@ fn replace(
     assert_eq!(
         std::str::from_utf8(
             &replacer
-                .replace(src.as_bytes(), false, true)
+                .replace(src.as_bytes(), false, false)
                 .expect("No matched")
         ),
         Ok(target)
     );
+
+    let replacer = FancyReplacer::new(
+        look_for,
+        replace_with,
+        literal,
+        flags.map(ToOwned::to_owned),
+        UNLIMITED_REPLACEMENTS,
+    )
+    .unwrap();
+    let r = replacer
+        .replace(&src.to_string(), false, false)
+        .expect("No matched").to_string();
+    assert_eq!(r, target);
 }
 
 #[test]

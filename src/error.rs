@@ -6,6 +6,8 @@ use crate::replacer::InvalidReplaceCapture;
 pub enum Error {
     #[error("invalid regex {0}")]
     Regex(#[from] regex::Error),
+    #[error("invalid regex {0}")]
+    FancyRegex(#[from] fancy_regex::Error),
     #[error(transparent)]
     File(#[from] std::io::Error),
     #[error("failed to move file: {0}")]
